@@ -4,3 +4,5 @@ todos = {
         "completed": False
     }
 }
+
+next_id = 2
