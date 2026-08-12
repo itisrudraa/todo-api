@@ -7,3 +7,11 @@ class Createtodo(BaseModel):
 class Updatetodo(BaseModel):
     title: str | None = None
     completed: bool | None = None
+
+class Todo(BaseModel):
+    title: str
+    completed: bool
+
+class todoResponse(BaseModel):
+    todo: Todo
+    message: str
