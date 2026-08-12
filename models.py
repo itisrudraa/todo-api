@@ -5,4 +5,5 @@ class Createtodo(BaseModel):
     completed: bool = False
 
 class Updatetodo(BaseModel):
-    title: str
+    title: str | None = None
+    completed: bool | None = None

@@ -21,37 +21,26 @@ def create_todo(newtodo: Createtodo):
     }
 
 
-@router.patch("/mark/{todo_id}")
-def mark(todo_id: int):
-    if todo_id in data.todos:
-        todo = data.todos[todo_id]
-        todo["completed"] = True
-
-        return {
-            "todo": todo,
-            "message" : "Maked"
-        }
-    else:
+@router.patch("/todos/{todo_id}")
+def update_todo(todo_id: int, update: Updatetodo):
+    if todo_id not in data.todos:
         raise HTTPException(
-            status_code=404,
-            detail="Invalid todo id"
+            status_code= 404,
+            detail="Invalid Todo ID"
         )
-    
-@router.patch("/edit/{todo_id}")
-def edit_title(todo_id: int, ntodo: Updatetodo):
-    if todo_id in data.todos:
-        todo = data.todos[todo_id]
-        todo["title"] = ntodo.title
 
-        return {
-            "todo": todo,
-            "message" : "title edited"
-        }
-    else:
-        raise HTTPException(
-            status_code=404,
-            detail="Invalid todo id"
-        )
+    todo = data.todos[todo_id]
+
+    if update.title is not None:
+        todo["title"] = update.title
+
+    if update.completed is not None:
+        todo["completed"] = update.completed
+
+    return{
+        "todo": todo,
+        "message": "todo updated"
+    }
 
 @router.get("/todos/{todo_id}")
 def get_todo(todo_id: int):
