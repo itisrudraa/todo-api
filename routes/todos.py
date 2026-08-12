@@ -1,9 +1,18 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from models import Createtodo, Updatetodo, todoResponse, Todo
 import data
 
 
 router = APIRouter(tags=["Todos"])
+
+def get_todo_dependency(todo_id: int):
+    if todo_id not in data.todos:
+        raise HTTPException(
+            status_code=404,
+            detail="Inavlid Todo ID"
+        )
+    todo = data.todos[todo_id]
+    return todo
 
 @router.get("/todos")
 def get_todos():
@@ -22,14 +31,7 @@ def create_todo(newtodo: Createtodo):
 
 
 @router.patch("/todos/{todo_id}", response_model=todoResponse)
-def update_todo(todo_id: int, update: Updatetodo):
-    if todo_id not in data.todos:
-        raise HTTPException(
-            status_code= 404,
-            detail="Invalid Todo ID"
-        )
-
-    todo = data.todos[todo_id]
+def update_todo(update: Updatetodo, todo = Depends(get_todo_dependency)):
 
     if update.title is not None:
         todo["title"] = update.title
@@ -43,26 +45,13 @@ def update_todo(todo_id: int, update: Updatetodo):
     }
 
 @router.get("/todos/{todo_id}", response_model=Todo)
-def get_todo(todo_id: int):
-    if todo_id in data.todos:
-        return data.todos[todo_id]
-    else:
-        raise HTTPException(
-            status_code=404,
-            detail="Invalid todo id"
-        )
+def get_todo(todo = Depends(get_todo_dependency)):
+    return todo
 
 @router.delete("/todos/{todo_id}", response_model=todoResponse)
-def delete_todo(todo_id: int):
-    if todo_id in data.todos:
-        todo = data.todos.pop(todo_id, None)
-        return{
-            "todo": todo,
-            "message": "todo deleted"
-        }
-    else:
-        raise HTTPException(
-            status_code=404,
-            detail="Invalid todo id"
-        )
-
+def delete_todo(todo_id: int, todo = Depends(get_todo_dependency)):
+    data.todos.pop(todo_id)
+    return{
+        "todo": todo,
+        "message": "todo deleted"
+    }
