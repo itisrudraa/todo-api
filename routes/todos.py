@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from models import Createtodo, Updatetodo, todoResponse, Todo
 import data
+from database import get_all_todos, createTodo
 
 
 router = APIRouter(prefix="/todos", tags=["Todos"])
@@ -16,17 +17,15 @@ def get_todo_dependency(todo_id: int):
 
 @router.get("")
 def get_todos():
-    return data.todos
+    return get_all_todos()
 
 @router.post("", response_model=todoResponse)
 def create_todo(newtodo: Createtodo):
-    new_id = data.next_id
-    data.next_id += 1
-    data.todos[new_id] = newtodo.model_dump()
+    todo = createTodo(newtodo.title, newtodo.completed)
 
-    return {
-        "todo": data.todos[new_id],
-        "message" : "todo created"
+    return{
+        "todo": todo,
+        "message": "todo added"
     }
 
 

@@ -9,6 +9,7 @@ class Updatetodo(BaseModel):
     completed: bool | None = None
 
 class Todo(BaseModel):
+    id: int
     title: str
     completed: bool
 
