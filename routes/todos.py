@@ -1,19 +1,9 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException
 from models import Createtodo, Updatetodo, todoResponse, Todo
-import data
-from database import get_all_todos, createTodo
+from database import get_all_todos, createTodo, updateTodo, getTodo, deleteTodo
 
 
 router = APIRouter(prefix="/todos", tags=["Todos"])
-
-def get_todo_dependency(todo_id: int):
-    if todo_id not in data.todos:
-        raise HTTPException(
-            status_code=404,
-            detail="Inavlid Todo ID"
-        )
-    todo = data.todos[todo_id]
-    return todo
 
 @router.get("")
 def get_todos():
@@ -30,13 +20,14 @@ def create_todo(newtodo: Createtodo):
 
 
 @router.patch("/{todo_id}", response_model=todoResponse)
-def update_todo(update: Updatetodo, todo = Depends(get_todo_dependency)):
+def update_todo(todo_id: int, update: Updatetodo):
 
-    if update.title is not None:
-        todo["title"] = update.title
-
-    if update.completed is not None:
-        todo["completed"] = update.completed
+    todo = updateTodo(todo_id, update.title, update.completed)
+    if todo is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Invalid todo ID"
+        )
 
     return{
         "todo": todo,
@@ -44,12 +35,25 @@ def update_todo(update: Updatetodo, todo = Depends(get_todo_dependency)):
     }
 
 @router.get("/{todo_id}", response_model=Todo)
-def get_todo(todo = Depends(get_todo_dependency)):
+def get_todo(todo_id: int):
+    todo = getTodo(todo_id)
+    if todo is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Invalid todo ID"
+        )
+
     return todo
 
 @router.delete("/{todo_id}", response_model=todoResponse)
-def delete_todo(todo_id: int, todo = Depends(get_todo_dependency)):
-    data.todos.pop(todo_id)
+def delete_todo(todo_id: int):
+    todo = deleteTodo(todo_id)
+    if todo is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Invalid todo ID"
+        )
+
     return{
         "todo": todo,
         "message": "todo deleted"
