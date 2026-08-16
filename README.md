@@ -2,7 +2,7 @@
 
 A RESTful Todo API built with **FastAPI** and **PostgreSQL**.
 
-This project was built incrementally to understand backend development fundamentals. It started with in-memory storage using a Python dictionary and was later migrated to PostgreSQL using `psycopg`.
+It started with in-memory storage using a Python dictionary and was later migrated to `PostgreSQL` using `psycopg`. The database layer was subsequently refactored to use `SQLAlchemy` for database operations.
 
 ## 🛠️ Tech Stack
 
@@ -10,15 +10,17 @@ This project was built incrementally to understand backend development fundament
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
 ![Pydantic](https://img.shields.io/badge/Pydantic-E92063?style=for-the-badge&logo=pydantic&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
+![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-D71F00?style=for-the-badge&logo=sqlalchemy&logoColor=white)
 ![Psycopg](https://img.shields.io/badge/Psycopg-336791?style=for-the-badge&logo=python&logoColor=white)
 ![Uvicorn](https://img.shields.io/badge/Uvicorn-499848?style=for-the-badge&logo=uvicorn&logoColor=white)
 
 
 ### Libraries & Tools
 
-- **Pydantic** - Request and response validation
-- **psycopg** - PostgreSQL database connectivity
-- **python-dotenv** - Environment variable management
+- SQLAlchemy - Database toolkit and ORM
+- psycopg - PostgreSQL database driver
+- Pydantic - Request and response validation
+- python-dotenv - Environment variable management
 
 ## Features
 
@@ -30,7 +32,8 @@ This project was built incrementally to understand backend development fundament
 - Request validation using Pydantic
 - Response validation using Pydantic
 - PostgreSQL database integration
-- SQL CRUD operations
+- Database CRUD operations using SQLAlchemy
+- SQLAlchemy ORM integration
 - Environment variables for database credentials
 - Automatic ID generation by PostgreSQL
 - Partial updates using `PATCH`
@@ -43,12 +46,13 @@ This project was built incrementally to understand backend development fundament
 todo-api/
 │
 ├── routes/
-│   └── todos.py          # Todo API routes
+│   └── todos.py
 │
-├── database.py           # PostgreSQL connection and SQL operations
-├── models.py             # Pydantic request/response models
-├── main.py               # FastAPI application entry point
-├── .env                  # Local database credentials
+├── database.py       # SQLAlchemy engine and session configuration
+├── models.py         # Pydantic models
+├── db_models.py      # SQLAlchemy database models
+├── main.py
+├── .env
 ├── .gitignore
 └── requirements.txt
 ```
@@ -80,13 +84,13 @@ Database operations are separated from the API routes:
 ```text
 FastAPI Route
       ↓
-database.py
+SQLAlchemy
       ↓
 psycopg
       ↓
 PostgreSQL
 ```
-The database layer handles SQL operations such as:
+The database layer uses SQLAlchemy to interact with PostgreSQL. SQLAlchemy handles database sessions, queries, and CRUD operations, while psycopg provides the PostgreSQL database driver.
 
 * `SELECT`
 * `INSERT`
@@ -162,7 +166,7 @@ http://127.0.0.1:8000/docs
 
 This project is being built incrementally to understand backend development fundamentals.
 
-* Completed
+### Completed
 * FastAPI application setup
 * Routing
 * Request parameters
@@ -173,8 +177,10 @@ This project is being built incrementally to understand backend development fund
 * APIRouter and route organization
 * Dependency injection basics
 * PostgreSQL setup
-* psycopg database connections
-* SQL CRUD operations
+* psycopg PostgreSQL database driver
+* SQLAlchemy database integration
+* SQLAlchemy CRUD operations
+* Database session management
 * Environment variable configuration
 * Migration from in-memory dictionary storage to PostgreSQL
 ### Next Steps
