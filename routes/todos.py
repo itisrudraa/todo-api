@@ -5,7 +5,7 @@ from database import get_all_todos, createTodo, updateTodo, getTodo, deleteTodo
 
 router = APIRouter(prefix="/todos", tags=["Todos"])
 
-@router.get("")
+@router.get("", response_model=list[Todo])
 def get_todos():
     return get_all_todos()
 

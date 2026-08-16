@@ -1,28 +1,29 @@
-import psycopg
+from sqlalchemy import create_engine, select
+from sqlalchemy.orm import sessionmaker
 import os
-from psycopg.rows import dict_row
 from dotenv import load_dotenv
 from models import Updatetodo
+from db_models import Todo
 
 load_dotenv()
 
-def get_connection():
-    return psycopg.connect(
-        host=os.getenv("DB_HOST"),
-        port=os.getenv("DB_PORT"),
-        dbname=os.getenv("DB_NAME"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD")
-    )
+engine = create_engine(os.getenv("DB_URL"))
+
+SessionLocal = sessionmaker(bind=engine)
+
+
+
 
 def get_all_todos():
-    conn = get_connection()
-    cur = conn.cursor(row_factory=dict_row)
-    cur.execute("SELECT * FROM todos ORDER BY id ASC;")
-    todos = cur.fetchall()
-    cur.close()
-    conn.close()
+    db = SessionLocal()
+    result = db.execute(
+        select(Todo)
+    )
+    todos = result.scalars().all()
+    db.close()
     return todos
+
+
 
 def createTodo(title: str, completed: bool):
     conn = get_connection()
@@ -49,6 +50,8 @@ def getTodo(todo_id: int):
     cur = conn.cursor(row_factory=dict_row)
     cur.execute("SELECT id, title, completed FROM todos WHERE id=%s", (todo_id,))
     todo = cur.fetchone()
+    cur.close()
+    conn.close()
     return todo
 
 def deleteTodo(todo_id: int):
