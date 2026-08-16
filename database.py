@@ -2,7 +2,6 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv
-from models import Updatetodo
 from db_models import Todo
 
 load_dotenv()
@@ -11,55 +10,59 @@ engine = create_engine(os.getenv("DB_URL"))
 
 SessionLocal = sessionmaker(bind=engine)
 
-
-
-
-def get_all_todos():
+def get_db():
     db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close() 
+    
+
+
+def get_all_todos(db):
     result = db.execute(
-        select(Todo)
+        select(Todo).order_by(Todo.id)
     )
     todos = result.scalars().all()
-    db.close()
     return todos
 
 
 
-def createTodo(title: str, completed: bool):
-    conn = get_connection()
-    cur = conn.cursor(row_factory=dict_row)
-    cur.execute("INSERT INTO todos (title, completed) VALUES (%s, %s) RETURNING id, title, completed",(title, completed))
-    todo = cur.fetchone()
-    conn.commit()
-    cur.close()
-    conn.close()
+def createTodo(title: str, completed: bool, db):
+    todo = Todo(
+        title = title,
+        completed = completed
+    )
+    db.add(todo)
+    db.commit()
+    db.refresh(todo)
     return todo
 
-def updateTodo(todo_id: int, title: str | None, completed: bool | None):
-   conn = get_connection()
-   cur = conn.cursor(row_factory=dict_row)
-   cur.execute("UPDATE todos SET title=COALESCE(%s, title), completed=COALESCE(%s, completed) WHERE id=%s RETURNING id, title, completed", (title, completed, todo_id))
-   todo = cur.fetchone()
-   conn.commit()
-   cur.close()
-   conn.close()
-   return todo
+def updateTodo(todo_id: int, title: str | None, completed: bool | None, db):
+    todo = db.get(Todo, todo_id)
 
-def getTodo(todo_id: int):
-    conn = get_connection()
-    cur = conn.cursor(row_factory=dict_row)
-    cur.execute("SELECT id, title, completed FROM todos WHERE id=%s", (todo_id,))
-    todo = cur.fetchone()
-    cur.close()
-    conn.close()
+    if todo is None:
+        return None
+
+    if title is not None:
+        todo.title = title
+
+    if completed is not None:
+        todo.completed = completed
+
+    db.commit()
+    db.refresh(todo)
     return todo
 
-def deleteTodo(todo_id: int):
-    conn = get_connection()
-    cur = conn.cursor(row_factory=dict_row)
-    cur.execute("DELETE FROM todos WHERE id=%s RETURNING id, title, completed", (todo_id,))
-    todo = cur.fetchone()
-    conn.commit()
-    cur.close()
-    conn.close()
+def getTodo(todo_id: int, db):
+    todo = db.get(Todo, todo_id)
+    return todo
+
+def deleteTodo(todo_id: int, db):
+
+    todo = db.get(Todo, todo_id)
+    if todo is None:
+        return None
+    db.delete(todo)
+    db.commit()
     return todo

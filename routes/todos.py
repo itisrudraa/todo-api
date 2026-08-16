@@ -1,17 +1,17 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from models import Createtodo, Updatetodo, todoResponse, Todo
-from database import get_all_todos, createTodo, updateTodo, getTodo, deleteTodo
+from database import get_all_todos, createTodo, updateTodo, getTodo, deleteTodo, get_db
 
 
 router = APIRouter(prefix="/todos", tags=["Todos"])
 
 @router.get("", response_model=list[Todo])
-def get_todos():
-    return get_all_todos()
+def get_todos(db=Depends(get_db)):
+    return get_all_todos(db)
 
 @router.post("", response_model=todoResponse)
-def create_todo(newtodo: Createtodo):
-    todo = createTodo(newtodo.title, newtodo.completed)
+def create_todo(newtodo: Createtodo, db=Depends(get_db)):
+    todo = createTodo(newtodo.title, newtodo.completed, db)
 
     return{
         "todo": todo,
@@ -20,9 +20,9 @@ def create_todo(newtodo: Createtodo):
 
 
 @router.patch("/{todo_id}", response_model=todoResponse)
-def update_todo(todo_id: int, update: Updatetodo):
+def update_todo(todo_id: int, update: Updatetodo, db=Depends(get_db)):
 
-    todo = updateTodo(todo_id, update.title, update.completed)
+    todo = updateTodo(todo_id, update.title, update.completed, db)
     if todo is None:
         raise HTTPException(
             status_code=404,
@@ -35,8 +35,8 @@ def update_todo(todo_id: int, update: Updatetodo):
     }
 
 @router.get("/{todo_id}", response_model=Todo)
-def get_todo(todo_id: int):
-    todo = getTodo(todo_id)
+def get_todo(todo_id: int, db=Depends(get_db)):
+    todo = getTodo(todo_id, db)
     if todo is None:
         raise HTTPException(
             status_code=404,
@@ -46,8 +46,8 @@ def get_todo(todo_id: int):
     return todo
 
 @router.delete("/{todo_id}", response_model=todoResponse)
-def delete_todo(todo_id: int):
-    todo = deleteTodo(todo_id)
+def delete_todo(todo_id: int, db=Depends(get_db)):
+    todo = deleteTodo(todo_id, db)
     if todo is None:
         raise HTTPException(
             status_code=404,
