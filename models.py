@@ -1,8 +1,9 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 class Createtodo(BaseModel):
     title: str
     completed: bool = False
+    user_id: int
 
 class Updatetodo(BaseModel):
     title: str | None = None
@@ -18,3 +19,19 @@ class Todo(BaseModel):
 class todoResponse(BaseModel):
     todo: Todo
     message: str
+
+# user models
+
+class UserModel(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
+
+class UserResponseModel(BaseModel):
+    id: int
+    username: str
+    email: EmailStr
+
+class LoginSchema(BaseModel):
+    email: EmailStr
+    password: str
